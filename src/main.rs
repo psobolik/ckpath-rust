@@ -2,17 +2,17 @@ use colored::Colorize;
 use std::env;
 use std::fs;
 
-static PATH: &'static str = "PATH";
+static PATH: &str = "PATH";
 
 fn main() {
     match env::var_os(PATH) {
         Some(ev_path) => {
             let paths = parse_ev_path(ev_path);
             for path in &paths {
-                match fs::metadata(&path) {
+                match fs::metadata(path) {
                     Ok(metadata) => {
                         if metadata.is_dir() {
-                            if count_occurances(&paths, &path) == 1 {
+                            if count_occurrences(&paths, path) == 1 {
                                 println!("{}", path);
                             } else {
                                 println!(
@@ -52,6 +52,6 @@ fn parse_ev_path(ev_path: std::ffi::OsString) -> Vec<String> {
     result
 }
 
-fn count_occurances(paths: &Vec<String>, target_path: &String) -> usize {
+fn count_occurrences(paths: &[String], target_path: &String) -> usize {
     paths.iter().filter(|path| path.eq(&target_path)).count()
 }
