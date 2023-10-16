@@ -2,8 +2,13 @@
 name = "ckpath"
 version = "0.1.0"
 edition = "2021"
+authors = ["psobolik@zoho.com"]
+description = "Command line tool to display and analyze the PATH environment."
+readme = "README.md"
+license = "MIT"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
 colored = "2.0"
+clap = { version = "4.0", features = ["derive"] }
