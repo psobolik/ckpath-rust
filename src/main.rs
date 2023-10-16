@@ -1,30 +1,38 @@
 use colored::Colorize;
 use std::env;
 use std::fs;
+use std::path::PathBuf;
 
 static PATH: &str = "PATH";
 
 fn main() {
     match env::var_os(PATH) {
         Some(ev_path) => {
-            let paths = parse_ev_path(ev_path);
+            // eprintln!("{:?}", ev_path);
+            // Collect non-blank items into a vector
+            let paths: Vec<PathBuf> = env::split_paths(&ev_path)
+                .filter(|path_buf| !path_buf.display().to_string().is_empty())
+                .collect();
             for path in &paths {
+                let path_string = path
+                    .to_str()
+                    .expect("Can't convert path element to string. (This should never happen.)");
                 match fs::metadata(path) {
                     Ok(metadata) => {
                         if metadata.is_dir() {
-                            if count_occurrences(&paths, path) == 1 {
-                                println!("{}", path);
-                            } else {
+                            if muliple_occurrences(&paths, path) {
                                 println!(
                                     "{} {}",
-                                    path.bright_yellow(),
+                                    path_string.bright_yellow(),
                                     "[Appears more than once]".bright_red()
                                 );
+                            } else {
+                                println!("{}", path_string);
                             }
                         } else {
                             println!(
                                 "{} {}",
-                                path.bright_yellow(),
+                                path_string.bright_yellow(),
                                 "[Is not a directory]".bright_red()
                             );
                         }
@@ -32,7 +40,7 @@ fn main() {
                     Err(e) => {
                         println!(
                             "{} {}",
-                            path.bright_yellow(),
+                            path_string.bright_yellow(),
                             format!("[{}]", e).bright_red()
                         )
                     }
@@ -43,15 +51,6 @@ fn main() {
     }
 }
 
-fn parse_ev_path(ev_path: std::ffi::OsString) -> Vec<String> {
-    let mut result: Vec<String> = Vec::new();
-    let path_strings_iter = env::split_paths(&ev_path).map(|f| f.display().to_string());
-    for path in path_strings_iter {
-        result.push(path);
-    }
-    result
-}
-
-fn count_occurrences(paths: &[String], target_path: &String) -> usize {
-    paths.iter().filter(|path| path.eq(&target_path)).count()
+fn muliple_occurrences(paths: &[PathBuf], target_path: &PathBuf) -> bool {
+    paths.iter().filter(|path| path.eq(&target_path)).count() > 1
 }
