@@ -3,7 +3,7 @@ name = "ckpath"
 version = "0.1.0"
 edition = "2021"
 authors = ["psobolik@zoho.com"]
-description = "Command line tool to display and analyze the PATH environment."
+description = "Command line tool to display and analyze the PATH or PSModulePath environment."
 readme = "README.md"
 license = "MIT"
 

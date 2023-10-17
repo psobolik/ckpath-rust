@@ -4,20 +4,29 @@ use std::env;
 use std::path::PathBuf;
 
 static PATH: &str = "PATH";
+static PSMODULEPATH: &str = "PSModulePath";
 
 #[derive(Parser)]
 #[command(author, version, about, long_about = None)]
 struct Arguments {
-    #[arg(short, long = "problems", help = "Show summary of problem items")]
+    #[arg(short, long, default_value_t = false, help = "Show PSModulePath instead of PATH")]
+    ps_moule_path: bool,
+
+    #[arg(short = 's', long = "summary", help = "Show summary of problem items")]
     problem_summary: bool,
 }
 
 fn main() {
     let args = Arguments::parse();
+    let ev = if args.ps_moule_path {
+        env::var_os(PSMODULEPATH)
+    } else {
+        env::var_os(PATH)     
+    };
 
-    match env::var_os(PATH) {
-        Some(ev_path) => {
-            write_path(ev_path.as_os_str(), &mut std::io::stdout(), args.problem_summary);
+    match ev {
+        Some(path) => {
+            write_path(path.as_os_str(), std::io::stdout(), args.problem_summary);
         }
         None => panic!("{} is not set", PATH),
     }
@@ -35,6 +44,7 @@ fn write_path(path: &std::ffi::OsStr, mut writer: impl std::io::Write, summary: 
 
     for path in &paths {
         let path_string = path.display().to_string();
+       
         if !path.exists() {
             write_error(&path_string, "Does not exist", &mut writer);
             non_existant.push(path.to_path_buf());
